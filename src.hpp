@@ -215,17 +215,16 @@ public:
             throw ArgumentException("Argument Error: PM Type Invalid ()");
         }
         validate_types_or_throw(query);
-        // match pokemons whose types include all in query
+        // match pokemons whose types include ANY in query (OR semantics)
         std::vector<const Pokemon*> matches;
         for (const auto &kv : mp) {
             const Pokemon &pm = kv.second;
-            bool ok = true;
+            bool ok_any = false;
             for (const auto &t : query) {
-                bool has = false;
-                for (const auto &pt : pm.types) if (pt == t) { has = true; break; }
-                if (!has) { ok = false; break; }
+                for (const auto &pt : pm.types) if (pt == t) { ok_any = true; break; }
+                if (ok_any) break;
             }
-            if (ok) matches.push_back(&pm);
+            if (ok_any) matches.push_back(&pm);
         }
         if (matches.empty()) return std::string("None");
         std::ostringstream oss;
@@ -328,4 +327,3 @@ public:
     iterator begin() { return iterator(&mp, mp.begin()); }
     iterator end() { return iterator(&mp, mp.end()); }
 };
-
